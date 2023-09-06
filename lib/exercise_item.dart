@@ -6,11 +6,13 @@ class ExerciseItem extends StatefulWidget{
     this.id = '',
     this.name = '',
     this.amount = 0,
-    required this.removeItem});
+    required this.removeItem,
+    required this.undoItem});
 
   final String name, id;
   final int amount;
   final RemoveCallback removeItem;
+  final UndoCallback undoItem;
 
   @override
   State<ExerciseItem> createState() => _ExerciseItemState();
@@ -24,6 +26,7 @@ class _ExerciseItemState extends State<ExerciseItem> {
   int amountVal = 0;
 
   @override
+  /* initialize variables from object creation */
   void initState() {
     super.initState();
     name = widget.name;
@@ -35,8 +38,8 @@ class _ExerciseItemState extends State<ExerciseItem> {
       return GestureDetector(
           onTap: () {showDialog(context: context, builder: (context) {
             return AlertDialog(
-                title: Text("Add Item", style: TextStyle(color: Colors.white)),
-                backgroundColor: Colors.blueGrey,
+                title: Text("Edit Item", style: TextStyle(color: Colors.black, fontSize: 25)),
+                backgroundColor: Colors.grey[300],
                 content: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget> [
@@ -81,27 +84,42 @@ class _ExerciseItemState extends State<ExerciseItem> {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(20)),
-              color: Colors.red,
+              color: Colors.grey[700],
+              border: Border.all(color: Colors.black),
             ),
             padding: EdgeInsets.all(20),
             margin: EdgeInsets.all(10),
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget> [
               Row(mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget> [Text('${amount} ', style: TextStyle(
+                  children: <Widget> [Text('$amount  ', style: TextStyle(
                   fontSize: 30,
                   wordSpacing: 20,
+                  color: Colors.white,
                   fontFamily: 'Barlow'
                 ),
               ),
               Text(name, style: TextStyle(
                   fontSize: 18,
                   fontFamily: 'Barlow',
+                  color: Colors.white,
               ))]),
               FloatingActionButton(
                   onPressed: (() {
-                    widget.removeItem(widget.id);
+                    widget.removeItem(widget);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text("Deleted $name", textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 16)),
+                        behavior: SnackBarBehavior.floating,
+                        action: SnackBarAction(
+                          label: 'Undo',
+                          onPressed: () {
+                            widget.undoItem(widget);
+                        },
+                      ),
+                    ));
                   }),
+                  backgroundColor: Colors.red[300],
 
                   child: Icon(Icons.delete_outline),)
             ]
@@ -111,4 +129,7 @@ class _ExerciseItemState extends State<ExerciseItem> {
     }
 }
 
-typedef RemoveCallback = void Function(String id);
+
+/* Call back functions */
+typedef RemoveCallback = void Function(ExerciseItem item);
+typedef UndoCallback = void Function(ExerciseItem item);
